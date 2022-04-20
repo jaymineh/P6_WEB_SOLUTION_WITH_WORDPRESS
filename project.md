@@ -24,6 +24,7 @@
     ![lsblk2](lsblk%202.png)
 
 - Install `lvm2` which will be used to chek for available partitions. Use `sudo yum install`. After installation, run `sudo lvmdiskscan` to check partition.
+
 ![lvmdiskscan](lvmdiskscan.png)
 
 - Next, the `pvcreate` utility is used to mark each of the 3 disks as physical volumes to be used by LVM.
@@ -179,7 +180,8 @@ Run the `sudo /etc/my.cnf` command to edit the config file on the DB server and 
 - Run the command `sudo mysql -u admin -p -h <DB-Server-Private-IP-address>` to confirm if the created user can connect remotely from the web server to the database server.
 1[dbadmin](dbadmin.png)
 
-- After the connection is successful, run `show databases;` to see if the created user has access to the database that was created on the DB server in step 5. In this case, the DB name is `wordpress`.
+- After the connection is successful, run `show databases;` to see if the created user has access to the database that was created on the DB server in step 5. In this case, the DB name is `wordpress`
+
 ![showdatabase](showdatabase.png)
 
 - Next, enable TCP port 80 in the NSG for the web server to allow you access WordPress on the browser.
