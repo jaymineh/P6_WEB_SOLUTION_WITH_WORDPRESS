@@ -6,26 +6,26 @@
 - Created a Redhat EC2 instance named "Web Server". Created and attached 3 10GB EBS volumes to the web server.
 
 - SSHd into the server and ran the `lsblk` command to check what storage blocks were attached to the server. Screenshot below shows that the 3 created storage blocks were successfully assigned.
-![storage block lsblk](lsblk.png)
+![storage block lsblk](images/lsblk.png)
 *The three disks are identified as `xvdf`, `xvdg` & `xvdh`.*
 
 - Ran `df -h` to see all mounts and free space on the server.
-![mounts](mounts.png)
+![mounts](images/mounts.png)
 
 - Here, the `gdisk` utility would be used to create a partition on all the disks as they currently do not have any partition.
 
     - Ran `sudo gdisk /dev/xvdf` to create a partition on the `xvdf` block. Use screenshot as guide.
-    ![xvdf](xvdf.png)
+    ![xvdf](images/xvdf.png)
     *When creating a new partition, use 8e00 to select LVM*
 
     - Repeated the above command for the `xvdg` & `xvdh` blocks.
 
     - After running the `gdisk` utility on all the blocks, run `lsblk` to see the updated list.
-    ![lsblk2](lsblk%202.png)
+    ![lsblk2](images/lsblk%202.png)
 
 - Install `lvm2` which will be used to chek for available partitions. Use `sudo yum install`. After installation, run `sudo lvmdiskscan` to check partition.
 
-![lvmdiskscan](lvmdiskscan.png)
+![lvmdiskscan](images/lvmdiskscan.png)
 
 - Next, the `pvcreate` utility is used to mark each of the 3 disks as physical volumes to be used by LVM.
 ```
@@ -34,10 +34,10 @@ sudo pvcreate /dev/xvdg1
 sudo pvcreate /dev/xvdh1
 ```
 After running the above commands, run `sudo pvs` to verify if the physical volume was successfully created.
-![pvcreate](pvcreate.png)
+![pvcreate](images/pvcreate.png)
 
 - Next, use `vgcreate` utility to add all the created  physical volumes into a volume group. Used `sudo vgcreate webdata-vg /dev/xvdh1 /dev/xvdg1 /dev/xvdf1` for all PVs. After running, use `sudo vgs` to verify.
-![vgcreate](vgcreate.png)
+![vgcreate](images/vgcreate.png)
 
 - Used the `lvcreate` utility to create 2 logical volumes. One called `apps-lv` and the other called `logs-lv`. Ran the code below to achieve that
 ```
@@ -45,17 +45,17 @@ sudo lvcreate -n apps-lv -L 14G webdata-vg
 sudo lvcreate -n logs-lv -L 14G webdata-vg
 ```
 Verified the logical volume using `sudo lvs`.
-![lvcreate](lvcreate.png)
+![lvcreate](images/lvcreate.png)
 
 - Verified the entire setup by running `sudo lsblk`
-![lsblk](lsblk%203.png)
+![lsblk](images/lsblk%203.png)
 
 - Next step would be to format the logical volumes with the ext4 filesystem. Use the command below.
 ```
 sudo mkfs -t ext4 /dev/webdata-vg/apps-lv
 sudo mkfs -t ext4 /dev/webdata-vg/logs-lv
 ```
-![formatext4](formatext4.png)
+![formatext4](images/formatext4.png)
 *`sudo mkfs.ext4` can be used instead of `sudo mkfs -t ext4`.*
 
 - Created 2 directories to store website files and log data. `/var/www/html` for website files and `/home/recovery/logs` for log data.
@@ -72,10 +72,10 @@ sudo mkfs -t ext4 /dev/webdata-vg/logs-lv
 ---
 
 - Ran `sudo blkid` to get the UUID of the device that would be used to update the `fstab` file.
-![blkid](blkid.png)
+![blkid](images/blkid.png)
 
 - After running the code above, the UUID will be displayed. Copy it from there and use it to update the `/etc/fstab` file in the format as seen below.
-![fstab](fstab.png)
+![fstab](images/fstab.png)
 
 Run the command below to test the configuration and reload the daemon.
 ```
@@ -167,22 +167,22 @@ exit
 
 - For added security, we need to bind the address of incoming connections on the DB server. Leaving this open ended will allow connections from anywhere (which is something we wouldn't want).
 Run the `sudo /etc/my.cnf` command to edit the config file on the DB server and then add the `bind-address` line with the private IP of the web server to the config file. See example screenshot below:
-![bindaddress](bindaddress.png)
+![bindaddress](images/bindaddress.png)
 
 **Step 6 - Configure WordPress To Connect To Remote Database**
 ---
 
 - Open up MySQL port 3306 on the DB Server to allow the web server reach the DB. **However,** only enable access from the web server's local/private IP address. This is strongly recommended for added security. See below:
-![securesql](securesql.png)
+![securesql](images/securesql.png)
 
 - Install MySQL client on the web server to be able to connect to the DB server remotely. THis was achieved by `sudo yum install mysql`.
 
 - Run the command `sudo mysql -u admin -p -h <DB-Server-Private-IP-address>` to confirm if the created user can connect remotely from the web server to the database server.
-1[dbadmin](dbadmin.png)
+1[dbadmin](images/dbadmin.png)
 
 - After the connection is successful, run `show databases;` to see if the created user has access to the database that was created on the DB server in step 5. In this case, the DB name is `wordpress`
 
-![showdatabase](showdatabase.png)
+![showdatabase](images/showdatabase.png)
 
 - Next, enable TCP port 80 in the NSG for the web server to allow you access WordPress on the browser.
 
@@ -190,15 +190,15 @@ Run the `sudo /etc/my.cnf` command to edit the config file on the DB server and 
 ---
 
 - Here, we need to modify the `wp-config.php` file on the web server to enable WordPress communicate with the DB server. If this is not done, there will be an error while trying to access WordPress on the browser (it is actually very easy to forget to do this and can cause a LOT of headaches seeing an error on your screen and not knowing why it's happening)
-![dberror](dberror.png)
+![dberror](images/dberror.png)
 
     - Run `cd wordpress` on the WS and locate the `wp-config.php` file. After this file has been found, insert the correct database name, username, password and host IP and then save. This will allow WordPress to communicate with the DB server.
-    ![wpconfig](wpconfig.png)
+    ![wpconfig](images/wpconfig.png)
 
 - Try accessing WordPress from the browser by using this format `http://<Web-Server-Public-IP-Address>/wordpress/`. See result below:
 ![wordpress](Wordpress.png)
 
 - Fill out the credentials to successfully create an account. After that, login with the credentials to be taken to the homepage.
-![wpsuccess](wpsuccess.png)
+![wpsuccess](images/wpsuccess.png)
 
 **WordPress Solution Deployed Successfully!**
