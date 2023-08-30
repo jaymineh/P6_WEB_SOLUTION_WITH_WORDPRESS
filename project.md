@@ -178,7 +178,7 @@ Run the `sudo /etc/my.cnf` command to edit the config file on the DB server and 
 - Install MySQL client on the web server to be able to connect to the DB server remotely. THis was achieved by `sudo yum install mysql`.
 
 - Run the command `sudo mysql -u admin -p -h <DB-Server-Private-IP-address>` to confirm if the created user can connect remotely from the web server to the database server.
-1[dbadmin](images/dbadmin.png)
+![dbadmin](images/dbadmin.png)
 
 - After the connection is successful, run `show databases;` to see if the created user has access to the database that was created on the DB server in step 5. In this case, the DB name is `wordpress`
 
@@ -196,7 +196,7 @@ Run the `sudo /etc/my.cnf` command to edit the config file on the DB server and 
     ![wpconfig](images/wpconfig.png)
 
 - Try accessing WordPress from the browser by using this format `http://<Web-Server-Public-IP-Address>/wordpress/`. See result below:
-![wordpress](Wordpress.png)
+![wordpress](images/Wordpress.png)
 
 - Fill out the credentials to successfully create an account. After that, login with the credentials to be taken to the homepage.
 ![wpsuccess](images/wpsuccess.png)
